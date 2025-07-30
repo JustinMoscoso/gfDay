@@ -464,6 +464,30 @@
             .music-icon {
                 font-size: 18px;
             }
+
+            /* Adjust animations for smaller screens */
+            @keyframes pound {
+                0% { transform: scale(1); }
+                25% { transform: scale(1.1); } /* Reduced from 1.2 */
+                50% { transform: scale(1); }
+                75% { transform: scale(1.08); } /* Reduced from 1.15 */
+                100% { transform: scale(1); }
+            }
+
+            @keyframes messageGlow {
+                0%, 100% { transform: translate(-50%, -50%) scale(1); }
+                50% { transform: translate(-50%, -50%) scale(1.02); } /* Reduced from 1.05 */
+            }
+
+            @keyframes headerGlow {
+                0%, 100% { transform: scale(1); }
+                50% { transform: scale(1.01); } /* Reduced from 1.02 */
+            }
+
+            @keyframes envelopeHeartBeat {
+                0%, 100% { transform: translate(-50%, -50%) scale(1); }
+                50% { transform: translate(-50%, -50%) scale(1.1); } /* Reduced from 1.2 */
+            }
         }
 
         /* Landscape mobile adjustments */
@@ -483,6 +507,30 @@
             .music-control {
                 top: 10px;
                 right: 10px;
+            }
+
+            /* Apply same animation adjustments for landscape mobile */
+            @keyframes pound {
+                0% { transform: scale(1); }
+                25% { transform: scale(1.1); }
+                50% { transform: scale(1); }
+                75% { transform: scale(1.08); }
+                100% { transform: scale(1); }
+            }
+
+            @keyframes messageGlow {
+                0%, 100% { transform: translate(-50%, -50%) scale(1); }
+                50% { transform: translate(-50%, -50%) scale(1.02); }
+            }
+
+            @keyframes headerGlow {
+                0%, 100% { transform: scale(1); }
+                50% { transform: scale(1.01); }
+            }
+
+            @keyframes envelopeHeartBeat {
+                0%, 100% { transform: translate(-50%, -50%) scale(1); }
+                50% { transform: translate(-50%, -50%) scale(1.1); }
             }
         }
     </style>
@@ -518,9 +566,9 @@
             <div class="letter-hearts" id="letterHearts"></div>
             <div class="letter-header">💕 My Dearest Mahal 💕</div>
             <div class="letter-body">
-                       Happy GF Dayy I am so proud of you nakikita ung progress mo onti onti and I am so lucky to have you as my partner in life, wag na wag kang susuko nandito lang ako palagi mahal iloveyousomuch mahal na mahal kitaa! 💖
+                Happy GF Dayy I am so proud of you nakikita ung progress mo onti onti and I am so lucky to have you as my partner in life mahal na mahal kitaa! 💖
             </div>
-            <div class="letter-signature">Forever yours Justin💕</div>
+            <div class="letter-signature">Forever yours 💕</div>
         </div>
     </div>
 
@@ -553,11 +601,30 @@
         let isMessageShown = false;
         let isEnvelopeOpen = false;
         let isMusicPlaying = false;
-        let musicStarted = false;
+        let audioContext = null; // For Web Audio API fallbacks
 
         // Set volume for the audio
         heartSound.volume = 0.7;
-        backgroundMusic.volume = 0.3; // Lower volume for background music
+        backgroundMusic.volume = 0.3;
+
+        // Function to ensure Web Audio API context is resumed/created
+        function getAudioContext() {
+            if (!audioContext) {
+                try {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    if (AudioContext) {
+                        audioContext = new AudioContext();
+                    }
+                } catch (e) {
+                    console.error('Web Audio API not supported or failed to initialize:', e);
+                }
+            }
+            // Resume context if suspended (common on first user interaction)
+            if (audioContext && audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+            return audioContext;
+        }
 
         // Create click ripple effect
         function createRipple(x, y) {
@@ -590,116 +657,141 @@
             }, 3000);
         }
 
-        // Start background music
-        function startBackgroundMusic() {
-            if (!musicStarted) {
-                const playPromise = backgroundMusic.play();
-                if (playPromise !== undefined) {
-                    playPromise.then(() => {
-                        isMusicPlaying = true;
-                        musicStarted = true;
-                        musicControl.classList.add('playing');
-                        musicIcon.innerHTML = '🎵';
-                    }).catch(error => {
-                        console.log('Background music autoplay prevented');
-                        // Create a gentle ambient sound using Web Audio API as fallback
-                        createAmbientSound();
-                    });
-                }
-            } else {
-                if (isMusicPlaying) {
-                    backgroundMusic.pause();
-                    isMusicPlaying = false;
-                    musicControl.classList.remove('playing');
-                    musicIcon.innerHTML = '🔇';
-                } else {
-                    backgroundMusic.play();
-                    isMusicPlaying = true;
-                    musicControl.classList.add('playing');
-                    musicIcon.innerHTML = '🎵';
-                }
-            }
-        }
-
-        // Create ambient sound using Web Audio API
-        function createAmbientSound() {
-            try {
-                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                const oscillator1 = audioContext.createOscillator();
-                const oscillator2 = audioContext.createOscillator();
-                const gainNode = audioContext.createGain();
-                
-                oscillator1.connect(gainNode);
-                oscillator2.connect(gainNode);
-                gainNode.connect(audioContext.destination);
-                
-                oscillator1.frequency.setValueAtTime(220, audioContext.currentTime); // A3
-                oscillator2.frequency.setValueAtTime(330, audioContext.currentTime); // E4
-                
-                oscillator1.type = 'sine';
-                oscillator2.type = 'sine';
-                
-                gainNode.gain.setValueAtTime(0.05, audioContext.currentTime);
-                
-                oscillator1.start();
-                oscillator2.start();
-                
-                isMusicPlaying = true;
-                musicStarted = true;
-                musicControl.classList.add('playing');
-                musicIcon.innerHTML = '🎵';
-                
-                // Stop after 30 seconds to prevent continuous playing
-                setTimeout(() => {
-                    oscillator1.stop();
-                    oscillator2.stop();
-                }, 30000);
-                
-            } catch (e) {
-                console.log('Web Audio API not supported');
-            }
-        }
-
-        // Play sound with fallback
+        // Play heart sound with better error handling
         function playHeartSound() {
+            getAudioContext(); // Ensure AudioContext is active
+            heartSound.currentTime = 0; // Reset to start
+            
             const playPromise = heartSound.play();
             
             if (playPromise !== undefined) {
                 playPromise.then(() => {
                     // Audio played successfully
                 }).catch(error => {
-                    try {
-                        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                        const oscillator = audioContext.createOscillator();
-                        const gainNode = audioContext.createGain();
-                        
-                        oscillator.connect(gainNode);
-                        gainNode.connect(audioContext.destination);
-                        
-                        oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
-                        oscillator.frequency.exponentialRampToValueAtTime(400, audioContext.currentTime + 0.1);
-                        
-                        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-                        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
-                        
-                        oscillator.start(audioContext.currentTime);
-                        oscillator.stop(audioContext.currentTime + 0.2);
-                    } catch (e) {
-                        console.log('Audio not supported');
-                    }
+                    console.log('Heart sound failed, using Web Audio API fallback:', error);
+                    createHeartSoundFallback();
                 });
+            } else {
+                // Fallback for older browsers without Promise support for play()
+                createHeartSoundFallback();
             }
         }
 
-        // Handle music control button
+        // Create heart sound using Web Audio API as fallback
+        function createHeartSoundFallback() {
+            const ctx = getAudioContext();
+            if (!ctx) return;
+
+            const oscillator = ctx.createOscillator();
+            const gainNode = ctx.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(ctx.destination);
+            
+            oscillator.frequency.setValueAtTime(800, ctx.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(400, ctx.currentTime + 0.1);
+            
+            gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+            
+            oscillator.start(ctx.currentTime);
+            oscillator.stop(ctx.currentTime + 0.2);
+        }
+
+        // Start/stop background music with better handling
+        function toggleBackgroundMusic() {
+            const ctx = getAudioContext(); // Ensure AudioContext is active
+            if (!ctx) {
+                console.error("AudioContext not available, cannot toggle music.");
+                return;
+            }
+
+            if (!isMusicPlaying) {
+                backgroundMusic.currentTime = 0; // Reset for replay
+                const playPromise = backgroundMusic.play();
+                
+                if (playPromise !== undefined) {
+                    playPromise.then(() => {
+                        isMusicPlaying = true;
+                        musicControl.classList.add('playing');
+                        musicIcon.innerHTML = '🎵';
+                    }).catch(error => {
+                        console.log('Background music failed to play, using Web Audio API fallback:', error);
+                        createAmbientSound();
+                    });
+                } else {
+                    createAmbientSound();
+                }
+            } else {
+                backgroundMusic.pause();
+                backgroundMusic.currentTime = 0; // Reset for next play
+                isMusicPlaying = false;
+                musicControl.classList.remove('playing');
+                musicIcon.innerHTML = '🔇';
+            }
+        }
+
+        // Create ambient sound using Web Audio API as fallback for background music
+        function createAmbientSound() {
+            const ctx = getAudioContext();
+            if (!ctx) return;
+
+            // Stop any existing ambient sounds if they were created
+            if (window.currentAmbientOscillators) {
+                window.currentAmbientOscillators.forEach(osc => {
+                    try { osc.stop(); } catch (e) {}
+                });
+            }
+            window.currentAmbientOscillators = [];
+
+            const oscillator1 = ctx.createOscillator();
+            const oscillator2 = ctx.createOscillator();
+            const gainNode = ctx.createGain();
+            
+            oscillator1.connect(gainNode);
+            oscillator2.connect(gainNode);
+            gainNode.connect(ctx.destination);
+            
+            oscillator1.frequency.setValueAtTime(220, ctx.currentTime); // A3
+            oscillator2.frequency.setValueAtTime(330, ctx.currentTime); // E4
+            
+            oscillator1.type = 'sine';
+            oscillator2.type = 'sine';
+            
+            gainNode.gain.setValueAtTime(0.05, ctx.currentTime);
+            
+            oscillator1.start();
+            oscillator2.start();
+            
+            window.currentAmbientOscillators.push(oscillator1, oscillator2);
+
+            isMusicPlaying = true;
+            musicControl.classList.add('playing');
+            musicIcon.innerHTML = '🎵';
+            
+            // Stop after 30 seconds to prevent continuous playing
+            setTimeout(() => {
+                try {
+                    oscillator1.stop();
+                    oscillator2.stop();
+                    isMusicPlaying = false;
+                    musicControl.classList.remove('playing');
+                    musicIcon.innerHTML = '🔇';
+                } catch (e) {
+                    // Oscillators already stopped
+                }
+            }, 30000);
+        }
+
+        // Handle music control button click/touch
         musicControl.addEventListener('click', function(e) {
-            e.stopPropagation();
-            startBackgroundMusic();
+            e.stopPropagation(); // Prevent this click from triggering document-wide click
+            toggleBackgroundMusic();
         });
 
         // Handle envelope click/touch
         envelopeContainer.addEventListener('click', function(e) {
-            e.stopPropagation();
+            e.stopPropagation(); // Prevent this click from triggering document-wide click
             
             if (!isEnvelopeOpen) {
                 envelope.classList.add('opening');
@@ -721,36 +813,35 @@
 
         // Handle close button
         closeButton.addEventListener('click', function(e) {
-            e.stopPropagation();
+            e.stopPropagation(); // Prevent this click from triggering document-wide click
             letterPopup.classList.remove('show');
             envelope.classList.remove('opening');
             isEnvelopeOpen = false;
         });
 
-        // Handle clicks/touches anywhere on the screen (except envelope and music control)
+        // Main document click/touch listener - handles first interaction for all audio
         document.addEventListener('click', function(e) {
+            // Ensure AudioContext is active on any user interaction
+            getAudioContext();
+
+            // If background music is not playing, attempt to start it on ANY click
+            if (!isMusicPlaying) {
+                toggleBackgroundMusic(); // This will attempt to play the music
+            }
+
+            // Handle other interactions if the click wasn't on the envelope or music control
             if (!envelopeContainer.contains(e.target) && 
                 !letterPopup.contains(e.target) && 
                 !musicControl.contains(e.target)) {
                 
-                // Start background music on first interaction
-                if (!musicStarted) {
-                    startBackgroundMusic();
-                }
-                
-                // Create ripple effect at click position
                 createRipple(e.clientX, e.clientY);
+                playHeartSound(); // This will now play on first click
                 
-                // Play sound
-                playHeartSound();
-                
-                // Add heart explosion effect
                 heart.classList.add('heart-clicked');
                 setTimeout(() => {
                     heart.classList.remove('heart-clicked');
                 }, 600);
 
-                // Toggle message
                 if (!isMessageShown) {
                     message.classList.add('show');
                     instruction.style.opacity = '0';
@@ -773,13 +864,6 @@
                 isEnvelopeOpen = false;
             }
         });
-
-        // Enable audio on first user interaction
-        document.addEventListener('click', function enableAudio() {
-            heartSound.load();
-            backgroundMusic.load();
-            document.removeEventListener('click', enableAudio);
-        }, { once: true });
 
         // Handle touch events for better mobile experience
         envelopeContainer.addEventListener('touchstart', function(e) {
@@ -808,6 +892,12 @@
                 backgroundMusic.currentTime = 0;
                 backgroundMusic.play();
             }
+        });
+
+        // Pre-load audio files on page load (silent)
+        window.addEventListener('load', function() {
+            heartSound.load();
+            backgroundMusic.load();
         });
     </script>
 </body>
