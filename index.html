@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>I Love You Mahal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #ff6b9d, #c44569, #f8b500);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+            cursor: pointer;
+            padding: 10px;
+        }
+
+        .heart-container {
+            text-align: center;
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .heart {
+            font-size: clamp(80px, 15vw, 150px);
+            color: #ff1744;
+            animation: pound 1.2s ease-in-out infinite;
+            text-shadow: 0 0 30px rgba(255, 23, 68, 0.6);
+            user-select: none;
+            transition: all 0.3s ease;
+        }
+
+        @keyframes pound {
+            0% { 
+                transform: scale(1);
+                text-shadow: 0 0 30px rgba(255, 23, 68, 0.6);
+            }
+            25% { 
+                transform: scale(1.2);
+                text-shadow: 0 0 50px rgba(255, 23, 68, 0.8);
+            }
+            50% { 
+                transform: scale(1);
+                text-shadow: 0 0 30px rgba(255, 23, 68, 0.6);
+            }
+            75% { 
+                transform: scale(1.15);
+                text-shadow: 0 0 40px rgba(255, 23, 68, 0.7);
+            }
+            100% { 
+                transform: scale(1);
+                text-shadow: 0 0 30px rgba(255, 23, 68, 0.6);
+            }
+        }
+
+        .message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: clamp(24px, 6vw, 42px);
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.4);
+            opacity: 0;
+            scale: 0;
+            transition: all 0.6s ease;
+            z-index: 20;
+            background: linear-gradient(45deg, #ff6b9d, #ff1744, #fff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            white-space: nowrap;
+            padding: 0 10px;
+        }
+
+        .message.show {
+            opacity: 1;
+            scale: 1;
+            animation: messageGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes messageGlow {
+            0%, 100% { 
+                text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+                transform: translate(-50%, -50%) scale(1);
+            }
+            50% { 
+                text-shadow: 0 0 40px rgba(255, 255, 255, 0.8);
+                transform: translate(-50%, -50%) scale(1.05);
+            }
+        }
+
+        .header {
+            font-size: clamp(28px, 8vw, 48px);
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.4);
+            margin-bottom: clamp(20px, 5vw, 30px);
+            animation: headerGlow 2.5s ease-in-out infinite;
+            background: linear-gradient(45deg, #ff6b9d, #fff, #ff1744);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            user-select: none;
+        }
+
+        @keyframes headerGlow {
+            0%, 100% { 
+                text-shadow: 0 0 20px rgba(255, 255, 255, 0.6);
+                transform: scale(1);
+            }
+            50% { 
+                text-shadow: 0 0 40px rgba(255, 255, 255, 0.9);
+                transform: scale(1.02);
+            }
+        }
+
+        .instruction {
+            position: absolute;
+            bottom: clamp(40px, 8vh, 60px);
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.9);
+            font-size: clamp(16px, 4vw, 20px);
+            animation: pulse 2s ease-in-out infinite;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            padding: 0 20px;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+
+        .click-effect {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            border: 3px solid rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: ripple 0.8s ease-out;
+        }
+
+        @keyframes ripple {
+            0% {
+                transform: scale(0);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+
+        .heart-clicked {
+            animation: heartExplode 0.6s ease-out;
+        }
+
+        @keyframes heartExplode {
+            0% { transform: scale(1); }
+            30% { transform: scale(1.4); }
+            60% { transform: scale(0.9); }
+            100% { transform: scale(1); }
+        }
+
+        /* Music Control Button */
+        .music-control {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            z-index: 200;
+            touch-action: manipulation;
+        }
+
+        .music-control:hover, .music-control:active {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+
+        .music-control.playing {
+            animation: musicPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes musicPulse {
+            0%, 100% { 
+                box-shadow: 0 0 0 0 rgba(255, 23, 68, 0.7);
+            }
+            50% { 
+                box-shadow: 0 0 0 10px rgba(255, 23, 68, 0);
+            }
+        }
+
+        .music-icon {
+            font-size: 20px;
+            color: #fff;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Envelope Styles - Moved to Left */
+        .envelope-container {
+            position: fixed;
+            bottom: clamp(20px, 5vh, 30px);
+            left: clamp(20px, 5vw, 30px);
+            cursor: pointer;
+            z-index: 100;
+            touch-action: manipulation;
+        }
+
+        .envelope {
+            width: clamp(70px, 12vw, 90px);
+            height: clamp(52px, 9vw, 68px);
+            background: #fff;
+            position: relative;
+            border-radius: 5px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            animation: envelopeBounce 2s ease-in-out infinite;
+        }
+
+        .envelope:hover, .envelope:active {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        @keyframes envelopeBounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .envelope-flap {
+            width: 0;
+            height: 0;
+            border-left: clamp(35px, 6vw, 45px) solid transparent;
+            border-right: clamp(35px, 6vw, 45px) solid transparent;
+            border-bottom: clamp(26px, 4.5vw, 34px) solid #f0f0f0;
+            position: absolute;
+            top: 0;
+            left: 0;
+            transform-origin: bottom center;
+            transition: all 0.5s ease;
+            z-index: 2;
+        }
+
+        .envelope.opening .envelope-flap {
+            transform: rotateX(180deg);
+            border-bottom-color: #e0e0e0;
+        }
+
+        .envelope-body {
+            width: 100%;
+            height: 100%;
+            background: #fff;
+            border-radius: 5px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .envelope-heart {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: clamp(18px, 4vw, 24px);
+            color: #ff1744;
+            animation: envelopeHeartBeat 1.5s ease-in-out infinite;
+        }
+
+        @keyframes envelopeHeartBeat {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.2); }
+        }
+
+        .envelope-text {
+            position: absolute;
+            bottom: clamp(-30px, -6vw, -35px);
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.9);
+            font-size: clamp(12px, 3vw, 14px);
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+            animation: textGlow 2s ease-in-out infinite;
+            white-space: nowrap;
+        }
+
+        @keyframes textGlow {
+            0%, 100% { opacity: 0.8; }
+            50% { opacity: 1; }
+        }
+
+        /* Letter Popup Styles - Mobile Optimized */
+        .letter-popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            padding: 20px;
+        }
+
+        .letter-popup.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .letter-content {
+            background: linear-gradient(145deg, #fff, #f8f8f8);
+            padding: clamp(25px, 6vw, 40px);
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+            position: relative;
+            transform: scale(0.7);
+            transition: all 0.3s ease;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .letter-popup.show .letter-content {
+            transform: scale(1);
+        }
+
+        .letter-header {
+            font-size: clamp(20px, 5vw, 28px);
+            color: #ff1744;
+            margin-bottom: clamp(15px, 4vw, 20px);
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .letter-body {
+            font-size: clamp(14px, 3.5vw, 18px);
+            line-height: 1.6;
+            color: #333;
+            margin-bottom: clamp(20px, 5vw, 30px);
+            text-align: left;
+            word-wrap: break-word;
+        }
+
+        .letter-signature {
+            font-size: clamp(16px, 4vw, 20px);
+            color: #ff1744;
+            font-weight: bold;
+            margin-top: clamp(15px, 4vw, 20px);
+        }
+
+        .close-button {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: clamp(20px, 5vw, 24px);
+            color: #999;
+            cursor: pointer;
+            transition: color 0.3s ease;
+            padding: 5px;
+            touch-action: manipulation;
+        }
+
+        .close-button:hover, .close-button:active {
+            color: #ff1744;
+        }
+
+        .letter-hearts {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .floating-letter-heart {
+            position: absolute;
+            font-size: clamp(12px, 3vw, 16px);
+            color: #ff1744;
+            opacity: 0.6;
+            animation: floatUp 3s ease-in-out infinite;
+        }
+
+        @keyframes floatUp {
+            0% {
+                transform: translateY(20px) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.6;
+            }
+            90% {
+                opacity: 0.6;
+            }
+            100% {
+                transform: translateY(-20px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Mobile-specific adjustments */
+        @media (max-width: 480px) {
+            body {
+                padding: 5px;
+            }
+            
+            .message {
+                font-size: 20px;
+                padding: 0 5px;
+            }
+            
+            .envelope-container {
+                bottom: 15px;
+                left: 15px;
+            }
+            
+            .letter-content {
+                padding: 20px;
+                border-radius: 10px;
+            }
+            
+            .instruction {
+                bottom: 30px;
+                padding: 0 10px;
+            }
+
+            .music-control {
+                top: 15px;
+                right: 15px;
+                width: 45px;
+                height: 45px;
+            }
+
+            .music-icon {
+                font-size: 18px;
+            }
+        }
+
+        /* Landscape mobile adjustments */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .header {
+                margin-bottom: 10px;
+            }
+            
+            .instruction {
+                bottom: 20px;
+            }
+            
+            .envelope-container {
+                bottom: 15px;
+            }
+
+            .music-control {
+                top: 10px;
+                right: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="heart-container">
+        <div class="header" id="header">Happy Gf dayyy!! 🎉</div>
+        <div class="heart" id="heart">❤️</div>
+        <div class="message" id="message">I love you Mahal 💕</div>
+        <div class="instruction" id="instruction">Click anywhere to hear my heart 💖</div>
+    </div>
+
+    <!-- Music Control Button -->
+    <div class="music-control" id="musicControl">
+        <div class="music-icon" id="musicIcon">🎵</div>
+    </div>
+
+    <!-- Envelope Animation - Now on the Left -->
+    <div class="envelope-container" id="envelopeContainer">
+        <div class="envelope" id="envelope">
+            <div class="envelope-flap"></div>
+            <div class="envelope-body">
+                <div class="envelope-heart">💌</div>
+            </div>
+        </div>
+        <div class="envelope-text">Open me! 💕</div>
+    </div>
+
+    <!-- Letter Popup -->
+    <div class="letter-popup" id="letterPopup">
+        <div class="letter-content">
+            <button class="close-button" id="closeButton">&times;</button>
+            <div class="letter-hearts" id="letterHearts"></div>
+            <div class="letter-header">💕 My Dearest Mahal 💕</div>
+            <div class="letter-body">
+                       Happy GF Dayy I am so proud of you nakikita ung progress mo onti onti and I am so lucky to have you as my partner in life, wag na wag kang susuko nandito lang ako palagi mahal iloveyousomuch mahal na mahal kitaa! 💖
+            </div>
+            <div class="letter-signature">Forever yours Justin💕</div>
+        </div>
+    </div>
+
+    <!-- Audio elements -->
+    <audio id="heartSound" preload="auto">
+        <source src="https://www.soundjay.com/misc/sounds/bell-ringing-05.wav" type="audio/wav">
+        <source src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" type="audio/ogg">
+    </audio>
+
+    <!-- Background Music -->
+    <audio id="backgroundMusic" preload="auto" loop>
+        <source src="https://www.bensound.com/bensound-music/bensound-romantic.mp3" type="audio/mpeg">
+        <source src="https://www.chosic.com/wp-content/uploads/2021/05/Romantic-Piano-Music.mp3" type="audio/mpeg">
+        <source src="https://freemusicarchive.org/music/Kevin_MacLeod/Romantic/Wallpaper" type="audio/mpeg">
+    </audio>
+
+    <script>
+        const heart = document.getElementById('heart');
+        const message = document.getElementById('message');
+        const instruction = document.getElementById('instruction');
+        const heartSound = document.getElementById('heartSound');
+        const backgroundMusic = document.getElementById('backgroundMusic');
+        const musicControl = document.getElementById('musicControl');
+        const musicIcon = document.getElementById('musicIcon');
+        const envelope = document.getElementById('envelope');
+        const envelopeContainer = document.getElementById('envelopeContainer');
+        const letterPopup = document.getElementById('letterPopup');
+        const closeButton = document.getElementById('closeButton');
+        const letterHearts = document.getElementById('letterHearts');
+        let isMessageShown = false;
+        let isEnvelopeOpen = false;
+        let isMusicPlaying = false;
+        let musicStarted = false;
+
+        // Set volume for the audio
+        heartSound.volume = 0.7;
+        backgroundMusic.volume = 0.3; // Lower volume for background music
+
+        // Create click ripple effect
+        function createRipple(x, y) {
+            const ripple = document.createElement('div');
+            ripple.className = 'click-effect';
+            ripple.style.left = (x - 50) + 'px';
+            ripple.style.top = (y - 50) + 'px';
+            document.body.appendChild(ripple);
+
+            setTimeout(() => {
+                if (ripple.parentNode) {
+                    ripple.parentNode.removeChild(ripple);
+                }
+            }, 800);
+        }
+
+        // Create floating hearts in letter popup
+        function createLetterHeart() {
+            const heart = document.createElement('div');
+            heart.className = 'floating-letter-heart';
+            heart.innerHTML = '💕';
+            heart.style.left = Math.random() * 100 + '%';
+            heart.style.animationDelay = Math.random() * 2 + 's';
+            letterHearts.appendChild(heart);
+
+            setTimeout(() => {
+                if (heart.parentNode) {
+                    heart.parentNode.removeChild(heart);
+                }
+            }, 3000);
+        }
+
+        // Start background music
+        function startBackgroundMusic() {
+            if (!musicStarted) {
+                const playPromise = backgroundMusic.play();
+                if (playPromise !== undefined) {
+                    playPromise.then(() => {
+                        isMusicPlaying = true;
+                        musicStarted = true;
+                        musicControl.classList.add('playing');
+                        musicIcon.innerHTML = '🎵';
+                    }).catch(error => {
+                        console.log('Background music autoplay prevented');
+                        // Create a gentle ambient sound using Web Audio API as fallback
+                        createAmbientSound();
+                    });
+                }
+            } else {
+                if (isMusicPlaying) {
+                    backgroundMusic.pause();
+                    isMusicPlaying = false;
+                    musicControl.classList.remove('playing');
+                    musicIcon.innerHTML = '🔇';
+                } else {
+                    backgroundMusic.play();
+                    isMusicPlaying = true;
+                    musicControl.classList.add('playing');
+                    musicIcon.innerHTML = '🎵';
+                }
+            }
+        }
+
+        // Create ambient sound using Web Audio API
+        function createAmbientSound() {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator1 = audioContext.createOscillator();
+                const oscillator2 = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator1.connect(gainNode);
+                oscillator2.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator1.frequency.setValueAtTime(220, audioContext.currentTime); // A3
+                oscillator2.frequency.setValueAtTime(330, audioContext.currentTime); // E4
+                
+                oscillator1.type = 'sine';
+                oscillator2.type = 'sine';
+                
+                gainNode.gain.setValueAtTime(0.05, audioContext.currentTime);
+                
+                oscillator1.start();
+                oscillator2.start();
+                
+                isMusicPlaying = true;
+                musicStarted = true;
+                musicControl.classList.add('playing');
+                musicIcon.innerHTML = '🎵';
+                
+                // Stop after 30 seconds to prevent continuous playing
+                setTimeout(() => {
+                    oscillator1.stop();
+                    oscillator2.stop();
+                }, 30000);
+                
+            } catch (e) {
+                console.log('Web Audio API not supported');
+            }
+        }
+
+        // Play sound with fallback
+        function playHeartSound() {
+            const playPromise = heartSound.play();
+            
+            if (playPromise !== undefined) {
+                playPromise.then(() => {
+                    // Audio played successfully
+                }).catch(error => {
+                    try {
+                        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                        const oscillator = audioContext.createOscillator();
+                        const gainNode = audioContext.createGain();
+                        
+                        oscillator.connect(gainNode);
+                        gainNode.connect(audioContext.destination);
+                        
+                        oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+                        oscillator.frequency.exponentialRampToValueAtTime(400, audioContext.currentTime + 0.1);
+                        
+                        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+                        
+                        oscillator.start(audioContext.currentTime);
+                        oscillator.stop(audioContext.currentTime + 0.2);
+                    } catch (e) {
+                        console.log('Audio not supported');
+                    }
+                });
+            }
+        }
+
+        // Handle music control button
+        musicControl.addEventListener('click', function(e) {
+            e.stopPropagation();
+            startBackgroundMusic();
+        });
+
+        // Handle envelope click/touch
+        envelopeContainer.addEventListener('click', function(e) {
+            e.stopPropagation();
+            
+            if (!isEnvelopeOpen) {
+                envelope.classList.add('opening');
+                isEnvelopeOpen = true;
+                
+                setTimeout(() => {
+                    letterPopup.classList.add('show');
+                    // Start creating floating hearts in the letter
+                    const heartInterval = setInterval(() => {
+                        if (letterPopup.classList.contains('show')) {
+                            createLetterHeart();
+                        } else {
+                            clearInterval(heartInterval);
+                        }
+                    }, 500);
+                }, 500);
+            }
+        });
+
+        // Handle close button
+        closeButton.addEventListener('click', function(e) {
+            e.stopPropagation();
+            letterPopup.classList.remove('show');
+            envelope.classList.remove('opening');
+            isEnvelopeOpen = false;
+        });
+
+        // Handle clicks/touches anywhere on the screen (except envelope and music control)
+        document.addEventListener('click', function(e) {
+            if (!envelopeContainer.contains(e.target) && 
+                !letterPopup.contains(e.target) && 
+                !musicControl.contains(e.target)) {
+                
+                // Start background music on first interaction
+                if (!musicStarted) {
+                    startBackgroundMusic();
+                }
+                
+                // Create ripple effect at click position
+                createRipple(e.clientX, e.clientY);
+                
+                // Play sound
+                playHeartSound();
+                
+                // Add heart explosion effect
+                heart.classList.add('heart-clicked');
+                setTimeout(() => {
+                    heart.classList.remove('heart-clicked');
+                }, 600);
+
+                // Toggle message
+                if (!isMessageShown) {
+                    message.classList.add('show');
+                    instruction.style.opacity = '0';
+                    isMessageShown = true;
+                } else {
+                    message.classList.remove('show');
+                    setTimeout(() => {
+                        instruction.style.opacity = '0.9';
+                    }, 300);
+                    isMessageShown = false;
+                }
+            }
+        });
+
+        // Close letter popup when clicking outside
+        letterPopup.addEventListener('click', function(e) {
+            if (e.target === letterPopup) {
+                letterPopup.classList.remove('show');
+                envelope.classList.remove('opening');
+                isEnvelopeOpen = false;
+            }
+        });
+
+        // Enable audio on first user interaction
+        document.addEventListener('click', function enableAudio() {
+            heartSound.load();
+            backgroundMusic.load();
+            document.removeEventListener('click', enableAudio);
+        }, { once: true });
+
+        // Handle touch events for better mobile experience
+        envelopeContainer.addEventListener('touchstart', function(e) {
+            e.preventDefault();
+            this.click();
+        });
+
+        musicControl.addEventListener('touchstart', function(e) {
+            e.preventDefault();
+            this.click();
+        });
+
+        // Prevent zoom on double tap for mobile
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', function (event) {
+            const now = (new Date()).getTime();
+            if (now - lastTouchEnd <= 300) {
+                event.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
+
+        // Handle background music ended event (in case it's not looping)
+        backgroundMusic.addEventListener('ended', function() {
+            if (isMusicPlaying) {
+                backgroundMusic.currentTime = 0;
+                backgroundMusic.play();
+            }
+        });
+    </script>
+</body>
+</html>
