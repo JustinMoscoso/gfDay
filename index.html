@@ -237,7 +237,7 @@
             border-radius: 5px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
             transition: all 0.3s ease;
-            animation: envelopePulse 2s ease-in-out infinite; /* Changed animation */
+            animation: envelopePulse 2s ease-in-out infinite;
         }
 
         .envelope:hover, .envelope:active {
@@ -245,10 +245,10 @@
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
         }
 
-        /* New envelope pulse animation */
+        /* Envelope pulse animation - slightly more noticeable on desktop, very subtle on mobile */
         @keyframes envelopePulse {
             0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.03); } /* Subtle scale for pulsing */
+            50% { transform: scale(1.05); } /* Increased from 1.03 for better visibility on PC */
         }
 
         .envelope-flap {
@@ -489,6 +489,12 @@
                 0%, 100% { transform: translate(-50%, -50%) scale(1); }
                 50% { transform: translate(-50%, -50%) scale(1.1); } /* Reduced from 1.2 */
             }
+
+            /* Make envelope pulse even more subtle on mobile */
+            @keyframes envelopePulse {
+                0%, 100% { transform: scale(1); }
+                50% { transform: scale(1.02); } /* Even more subtle for mobile */
+            }
         }
 
         /* Landscape mobile adjustments */
@@ -532,6 +538,12 @@
             @keyframes envelopeHeartBeat {
                 0%, 100% { transform: translate(-50%, -50%) scale(1); }
                 50% { transform: translate(-50%, -50%) scale(1.1); }
+            }
+
+            /* Make envelope pulse even more subtle for landscape mobile */
+            @keyframes envelopePulse {
+                0%, 100% { transform: scale(1); }
+                50% { transform: scale(1.02); }
             }
         }
     </style>
