@@ -120,6 +120,7 @@
                 transform: scale(1);
             }
             50% { 
+                text-shadow: 0 0 40px rgba(255, 255, 255, 0.9);
                 transform: scale(1.02);
             }
         }
@@ -218,35 +219,97 @@
             text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
         }
 
-        /* New "Click me!" text styles */
-        .click-me-text {
+        /* Envelope Styles - Moved to Left */
+        .envelope-container {
             position: fixed;
             bottom: clamp(20px, 5vh, 30px);
             left: clamp(20px, 5vw, 30px);
-            font-size: clamp(20px, 5vw, 28px);
-            font-weight: bold;
-            color: #fff;
-            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.4);
             cursor: pointer;
             z-index: 100;
-            user-select: none;
-            animation: clickMePound 1.5s ease-in-out infinite;
-            padding: 5px 10px;
-            border-radius: 8px;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(5px);
-            transition: all 0.2s ease;
-            white-space: nowrap; /* Prevent text wrapping */
+            touch-action: manipulation;
         }
 
-        .click-me-text:hover, .click-me-text:active {
-            transform: scale(1.05);
-            background: rgba(255, 255, 255, 0.2);
+        .envelope {
+            width: clamp(70px, 12vw, 90px);
+            height: clamp(52px, 9vw, 68px);
+            background: #fff;
+            position: relative;
+            border-radius: 5px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            animation: envelopePulse 2s ease-in-out infinite; /* Changed animation */
         }
 
-        @keyframes clickMePound {
+        .envelope:hover, .envelope:active {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        /* New envelope pulse animation */
+        @keyframes envelopePulse {
             0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.08); }
+            50% { transform: scale(1.03); } /* Subtle scale for pulsing */
+        }
+
+        .envelope-flap {
+            width: 0;
+            height: 0;
+            border-left: clamp(35px, 6vw, 45px) solid transparent;
+            border-right: clamp(35px, 6vw, 45px) solid transparent;
+            border-bottom: clamp(26px, 4.5vw, 34px) solid #f0f0f0;
+            position: absolute;
+            top: 0;
+            left: 0;
+            transform-origin: bottom center;
+            transition: all 0.5s ease;
+            z-index: 2;
+        }
+
+        .envelope.opening .envelope-flap {
+            transform: rotateX(180deg);
+            border-bottom-color: #e0e0e0;
+        }
+
+        .envelope-body {
+            width: 100%;
+            height: 100%;
+            background: #fff;
+            border-radius: 5px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .envelope-heart {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: clamp(18px, 4vw, 24px);
+            color: #ff1744;
+            animation: envelopeHeartBeat 1.5s ease-in-out infinite;
+        }
+
+        @keyframes envelopeHeartBeat {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.2); }
+        }
+
+        .envelope-text {
+            position: absolute;
+            bottom: clamp(-30px, -6vw, -35px);
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.9);
+            font-size: clamp(12px, 3vw, 14px);
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+            animation: textGlow 2s ease-in-out infinite;
+            white-space: nowrap;
+        }
+
+        @keyframes textGlow {
+            0%, 100% { opacity: 0.8; }
+            50% { opacity: 1; }
         }
 
         /* Letter Popup Styles - Mobile Optimized */
@@ -377,6 +440,16 @@
                 padding: 0 5px;
             }
             
+            .envelope-container {
+                bottom: 15px;
+                left: 15px;
+            }
+            
+            .letter-content {
+                padding: 20px;
+                border-radius: 10px;
+            }
+            
             .instruction {
                 bottom: 30px;
                 padding: 0 10px;
@@ -396,26 +469,25 @@
             /* Adjust animations for smaller screens */
             @keyframes pound {
                 0% { transform: scale(1); }
-                25% { transform: scale(1.1); }
+                25% { transform: scale(1.1); } /* Reduced from 1.2 */
                 50% { transform: scale(1); }
-                75% { transform: scale(1.08); }
+                75% { transform: scale(1.08); } /* Reduced from 1.15 */
                 100% { transform: scale(1); }
             }
 
             @keyframes messageGlow {
                 0%, 100% { transform: translate(-50%, -50%) scale(1); }
-                50% { transform: translate(-50%, -50%) scale(1.02); }
+                50% { transform: translate(-50%, -50%) scale(1.02); } /* Reduced from 1.05 */
             }
 
             @keyframes headerGlow {
                 0%, 100% { transform: scale(1); }
-                50% { transform: scale(1.01); }
+                50% { transform: scale(1.01); } /* Reduced from 1.02 */
             }
 
-            /* Make click-me-text pulse even more subtle on mobile */
-            @keyframes clickMePound {
-                0%, 100% { transform: scale(1); }
-                50% { transform: scale(1.05); }
+            @keyframes envelopeHeartBeat {
+                0%, 100% { transform: translate(-50%, -50%) scale(1); }
+                50% { transform: translate(-50%, -50%) scale(1.1); } /* Reduced from 1.2 */
             }
         }
 
@@ -429,6 +501,10 @@
                 bottom: 20px;
             }
             
+            .envelope-container {
+                bottom: 15px;
+            }
+
             .music-control {
                 top: 10px;
                 right: 10px;
@@ -453,10 +529,9 @@
                 50% { transform: scale(1.01); }
             }
 
-            /* Make click-me-text pulse even more subtle for landscape mobile */
-            @keyframes clickMePound {
-                0%, 100% { transform: scale(1); }
-                50% { transform: scale(1.05); }
+            @keyframes envelopeHeartBeat {
+                0%, 100% { transform: translate(-50%, -50%) scale(1); }
+                50% { transform: translate(-50%, -50%) scale(1.1); }
             }
         }
     </style>
@@ -474,8 +549,16 @@
         <div class="music-icon" id="musicIcon">🎵</div>
     </div>
 
-    <!-- "Click me!" Text -->
-    <div class="click-me-text" id="clickMeText">Click me! 💕</div>
+    <!-- Envelope Animation - Now on the Left -->
+    <div class="envelope-container" id="envelopeContainer">
+        <div class="envelope" id="envelope">
+            <div class="envelope-flap"></div>
+            <div class="envelope-body">
+                <div class="envelope-heart">💌</div>
+            </div>
+        </div>
+        <div class="envelope-text">Open me! 💕</div>
+    </div>
 
     <!-- Letter Popup -->
     <div class="letter-popup" id="letterPopup">
@@ -484,9 +567,9 @@
             <div class="letter-hearts" id="letterHearts"></div>
             <div class="letter-header">💕 My Dearest Mahal 💕</div>
             <div class="letter-body">
-                Happy GF Dayy I am so proud of you nakikita ung progress mo onti onti and I am so lucky to have you as my partner in life mahal na mahal kitaa! 💖
+                Happy GF Dayy I am so proud of you nakikita ung progress mo onti onti and I am so lucky to have you as my partner in life, kahit nahihirapan ka mag adjust sa work mo nandito lang ako palagi sa tabi mo. mahal na mahal kitaa! 💖
             </div>
-            <div class="letter-signature">Forever yours 💕</div>
+            <div class="letter-signature">Forever yours Justin💕</div>
         </div>
     </div>
 
@@ -511,12 +594,13 @@
         const backgroundMusic = document.getElementById('backgroundMusic');
         const musicControl = document.getElementById('musicControl');
         const musicIcon = document.getElementById('musicIcon');
-        const clickMeText = document.getElementById('clickMeText'); // New element
+        const envelope = document.getElementById('envelope');
+        const envelopeContainer = document.getElementById('envelopeContainer');
         const letterPopup = document.getElementById('letterPopup');
         const closeButton = document.getElementById('closeButton');
         const letterHearts = document.getElementById('letterHearts');
         let isMessageShown = false;
-        let isLetterPopupOpen = false; // Renamed for clarity
+        let isEnvelopeOpen = false;
         let isMusicPlaying = false;
         let audioContext = null; // For Web Audio API fallbacks
 
@@ -706,21 +790,24 @@
             toggleBackgroundMusic();
         });
 
-        // Handle "Click me!" text click/touch
-        clickMeText.addEventListener('click', function(e) {
+        // Handle envelope click/touch
+        envelopeContainer.addEventListener('click', function(e) {
             e.stopPropagation(); // Prevent this click from triggering document-wide click
             
-            if (!isLetterPopupOpen) {
-                letterPopup.classList.add('show');
-                isLetterPopupOpen = true;
+            if (!isEnvelopeOpen) {
+                envelope.classList.add('opening');
+                isEnvelopeOpen = true;
                 
-                // Start creating floating hearts in the letter
-                const heartInterval = setInterval(() => {
-                    if (letterPopup.classList.contains('show')) {
-                        createLetterHeart();
-                    } else {
-                        clearInterval(heartInterval);
-                    }
+                setTimeout(() => {
+                    letterPopup.classList.add('show');
+                    // Start creating floating hearts in the letter
+                    const heartInterval = setInterval(() => {
+                        if (letterPopup.classList.contains('show')) {
+                            createLetterHeart();
+                        } else {
+                            clearInterval(heartInterval);
+                        }
+                    }, 500);
                 }, 500);
             }
         });
@@ -729,7 +816,8 @@
         closeButton.addEventListener('click', function(e) {
             e.stopPropagation(); // Prevent this click from triggering document-wide click
             letterPopup.classList.remove('show');
-            isLetterPopupOpen = false; // Reset state
+            envelope.classList.remove('opening');
+            isEnvelopeOpen = false;
         });
 
         // Main document click/touch listener - handles first interaction for all audio
@@ -742,8 +830,8 @@
                 toggleBackgroundMusic(); // This will attempt to play the music
             }
 
-            // Handle other interactions if the click wasn't on the "Click me!" text or music control
-            if (!clickMeText.contains(e.target) && 
+            // Handle other interactions if the click wasn't on the envelope or music control
+            if (!envelopeContainer.contains(e.target) && 
                 !letterPopup.contains(e.target) && 
                 !musicControl.contains(e.target)) {
                 
@@ -773,12 +861,13 @@
         letterPopup.addEventListener('click', function(e) {
             if (e.target === letterPopup) {
                 letterPopup.classList.remove('show');
-                isLetterPopupOpen = false; // Reset state
+                envelope.classList.remove('opening');
+                isEnvelopeOpen = false;
             }
         });
 
         // Handle touch events for better mobile experience
-        clickMeText.addEventListener('touchstart', function(e) {
+        envelopeContainer.addEventListener('touchstart', function(e) {
             e.preventDefault();
             this.click();
         });
